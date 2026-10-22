@@ -267,7 +267,7 @@
   </style>
 </head>
 <body>
-  <div class="layout">
+  <div class="layout" data-snapshot-label="Oktober 2026" data-snapshot-id="2026-10">
     <aside class="sidebar" id="sidebar-nav" aria-label="Navigasi utama">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">
@@ -301,7 +301,7 @@
       </header>
       <div class="content">
         <section class="page-heading">
-          <div><h1>Dashboard</h1><p>Pilih periode untuk memperbarui KPI; grafik, komposisi, dan transaksi adalah snapshot data dummy Oktober 2026.</p></div>
+          <div><h1>Dashboard</h1><p>Pilih periode untuk memperbarui KPI; grafik, komposisi, dan transaksi adalah snapshot data dummy <span data-snapshot-period>Oktober 2026</span>.</p></div>
           <div class="heading-actions"><select class="select" aria-label="Pilih periode"><option value="2026-10">Oktober 2026</option><option value="2026-09">September 2026</option><option value="2026-08">Agustus 2026</option></select><button class="export-btn" type="button" data-action="export"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M5 17v4h14v-4"/></svg>Unduh laporan</button></div>
         </section>
         <section class="welcome">
@@ -329,7 +329,7 @@
                 <rect class="bar income" x="525" y="31" width="22" height="117"/><rect class="bar savings" x="551" y="57" width="22" height="91"/>
                 <text x="75" y="170">Mei</text><text x="165" y="170">Jun</text><text x="255" y="170">Jul</text><text x="345" y="170">Agu</text><text x="435" y="170">Sep</text><text x="525" y="170">Okt</text>
               </svg>
-              <div class="chart-foot"><span>Periode: <strong>Mei – Oktober 2026</strong></span><span>Dalam Rupiah (juta)</span></div>
+              <div class="chart-foot"><span>Periode: <strong>Mei – <span data-snapshot-period>Oktober 2026</span></strong></span><span>Dalam Rupiah (juta)</span></div>
             </div>
           </article>
           <article class="panel side-panel">
@@ -365,7 +365,7 @@
               <div class="activity"><span class="activity-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><div class="activity-copy"><strong>Angsuran pinjaman diterima</strong><span>Siti Nurhaliza · Rp 1.500.000</span></div><time>09:42</time></div>
               <div class="activity"><span class="activity-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg></span><div class="activity-copy"><strong>Pengajuan pinjaman baru</strong><span>Ahmad Hidayat · Rp 15.000.000</span></div><time>09:15</time></div>
               <div class="activity"><span class="activity-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 8v6M23 11h-6"/></svg></span><div class="activity-copy"><strong>Anggota baru terdaftar</strong><span>Rizky Firmansyah · Unit Keuangan</span></div><time>Kemarin</time></div>
-              <div class="activity"><span class="activity-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4zM4 10h16M8 4v6M16 4v6"/></svg></span><div class="activity-copy"><strong>Rekap simpanan diperbarui</strong><span>Periode Oktober 2026</span></div><time>Kemarin</time></div>
+              <div class="activity"><span class="activity-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4zM4 10h16M8 4v6M16 4v6"/></svg></span><div class="activity-copy"><strong>Rekap simpanan diperbarui</strong><span>Periode <span data-snapshot-period>Oktober 2026</span></span></div><time>Kemarin</time></div>
             </div>
           </article>
         </section>
@@ -385,6 +385,11 @@
     <div class="dialog-body" id="dialog-content"></div>
   </dialog>
   <script>
+    const demoSnapshot = document.querySelector('.layout').dataset;
+    document.querySelectorAll('[data-snapshot-period]').forEach((element) => {
+      element.textContent = demoSnapshot.snapshotLabel;
+    });
+
     const demoViews = {
       anggota: {
         title: 'Data Anggota',
@@ -394,7 +399,7 @@
       },
       simpanan: {
         title: 'Simpanan Anggota',
-        description: 'Snapshot Oktober 2026: ringkasan saldo simpanan dummy berdasarkan jenis simpanan.',
+        description: `Snapshot ${demoSnapshot.snapshotLabel}: ringkasan saldo simpanan dummy berdasarkan jenis simpanan.`,
         columns: ['Jenis simpanan', 'Jumlah anggota', 'Saldo'],
         rows: [['Pokok', '1.248', 'Rp 1,16 M'], ['Wajib', '1.192', 'Rp 824 jt'], ['Sukarela', '462', 'Rp 539 jt'], ['Deposito', '87', 'Rp 311 jt']]
       },
@@ -406,7 +411,7 @@
       },
       laporan: {
         title: 'Laporan Koperasi',
-        description: 'Pratinjau laporan keuangan data dummy Oktober 2026.',
+        description: `Pratinjau laporan keuangan data dummy ${demoSnapshot.snapshotLabel}.`,
         columns: ['Indikator', 'Nilai dummy', 'Perubahan'],
         rows: [['Total simpanan', 'Rp 2,84 M', '+6,2%'], ['Pinjaman berjalan', 'Rp 1,26 M', '−2,1%'], ['Estimasi SHU', 'Rp 186,5 jt', '+8,4%'], ['Anggota aktif', '1.248', '+4,8%']]
       },
@@ -432,14 +437,14 @@
       },
       transaksi: {
         title: 'Semua Transaksi',
-        description: 'Contoh transaksi terbaru pada snapshot Oktober 2026.',
+        description: `Contoh transaksi terbaru pada snapshot ${demoSnapshot.snapshotLabel}.`,
         columns: ['Anggota', 'Jenis', 'Tanggal', 'Nominal', 'Status'],
         rows: [['Budi Prasetyo', 'Simpanan wajib', '22 Okt 2026', '+ Rp 250.000', 'Berhasil'], ['Siti Nurhaliza', 'Angsuran pinjaman', '22 Okt 2026', '+ Rp 1.500.000', 'Berhasil'], ['Ahmad Hidayat', 'Pengajuan pinjaman', '21 Okt 2026', 'Rp 15.000.000', 'Menunggu'], ['Dewi Wulandari', 'Simpanan sukarela', '21 Okt 2026', '+ Rp 750.000', 'Berhasil'], ['Rizky Firmansyah', 'Simpanan pokok', '20 Okt 2026', '+ Rp 500.000', 'Berhasil']]
       },
       aktivitas: {
         title: 'Aktivitas Terkini',
         description: 'Jejak aktivitas operasional dalam demo koperasi.',
-        cards: [['09:42 · Pembayaran', 'Angsuran Siti Nurhaliza · Rp 1.500.000'], ['09:15 · Persetujuan', 'Pengajuan Ahmad Hidayat menunggu tinjauan'], ['Kemarin · Anggota', 'Rizky Firmansyah terdaftar di Unit Keuangan'], ['Kemarin · Rekonsiliasi', 'Rekap simpanan Oktober berhasil diperbarui']]
+        cards: [['09:42 · Pembayaran', 'Angsuran Siti Nurhaliza · Rp 1.500.000'], ['09:15 · Persetujuan', 'Pengajuan Ahmad Hidayat menunggu tinjauan'], ['Kemarin · Anggota', 'Rizky Firmansyah terdaftar di Unit Keuangan'], ['Kemarin · Rekonsiliasi', `Rekap simpanan ${demoSnapshot.snapshotLabel} berhasil diperbarui`]]
       },
       odoo: {
         title: 'Simulasi Koperasi dengan Odoo ERP',
@@ -466,6 +471,7 @@
       '2026-08': { values: ['1.226', 'Rp 2,52 M', 'Rp 1,31 M', 'Rp 158,8 jt'], trends: ['↗ 3,2%', '↗ 5,4%', '↘ 1,5%', '↗ 7,1%'] }
     };
     let dialogOpener = null;
+    let previousActiveView = 'dashboard';
 
     function closeMobileMenu(restoreFocus = false) {
       sidebar.classList.remove('open');
@@ -478,7 +484,7 @@
 
     function setActiveView(key) {
       document.querySelectorAll('[data-view]').forEach((item) => {
-        const active = item.dataset.view === key;
+        const active = item.dataset.view === key && item.getClientRects().length > 0 && !item.closest('[inert]');
         item.classList.toggle('active', active);
         if (active) item.setAttribute('aria-current', 'page');
         else item.removeAttribute('aria-current');
@@ -489,7 +495,10 @@
       const view = demoViews[key];
       if (!view) return;
       dialogOpener = opener;
-      if (document.querySelector(`[data-view="${key}"]`)) setActiveView(key);
+      if (document.querySelector(`[data-view="${key}"]`)) {
+        previousActiveView = document.querySelector('[data-view].active')?.dataset.view || 'dashboard';
+        setActiveView(key);
+      }
       dialogTitle.textContent = view.title;
       dialogDescription.textContent = view.description;
       dialogContent.replaceChildren();
@@ -572,7 +581,8 @@
       const opener = dialogOpener;
       if (opener && opener.getClientRects().length && !opener.closest('[inert]')) opener.focus();
       else if (window.innerWidth <= 600) menuButton.focus();
-      setActiveView('dashboard');
+      setActiveView(previousActiveView);
+      previousActiveView = 'dashboard';
       dialogOpener = null;
     });
 
@@ -587,6 +597,7 @@
       main.inert = true;
       mobileBottom.inert = true;
       menuButton.setAttribute('aria-expanded', 'true');
+      setActiveView('dashboard');
       sidebar.querySelector('[data-view]')?.focus();
     });
     menuBackdrop.addEventListener('click', () => closeMobileMenu(true));
@@ -627,11 +638,16 @@
     });
 
     function normalizeIndonesianAmount(value) {
-      const amount = value.trim().match(/^([+-]?)\s*(?:Rp\s*)?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?$/i);
+      const amount = value.trim().match(/^([+-]?)\s*(?:Rp\s*)?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?\s*(jt|juta|m|miliar)?$/i);
       if (!amount) return value;
       const sign = amount[1] === '+' ? '' : amount[1];
       const whole = amount[2].replace(/\./g, '');
-      return `${sign}${whole}${amount[3] ? `.${amount[3]}` : ''}`;
+      const numericValue = Number(`${whole}${amount[3] ? `.${amount[3]}` : ''}`);
+      const suffix = amount[4]?.toLowerCase();
+      const multiplier = suffix === 'jt' || suffix === 'juta' ? 1000000 : suffix === 'm' || suffix === 'miliar' ? 1000000000 : 1;
+      const normalizedValue = numericValue * multiplier;
+      const normalizedText = Number.isInteger(normalizedValue) ? String(normalizedValue) : String(Number(normalizedValue.toFixed(2)));
+      return `${sign}${normalizedText}`;
     }
 
     document.querySelector('[data-action="export"]').addEventListener('click', () => {
@@ -654,7 +670,7 @@
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'laporan-transaksi-snapshot-2026-10.csv';
+      link.download = `laporan-transaksi-snapshot-${demoSnapshot.snapshotId}.csv`;
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
