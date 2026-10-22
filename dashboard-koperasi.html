@@ -507,7 +507,9 @@
         setActiveView(key);
       }
       dialogTitle.textContent = view.title;
-      dialogDescription.textContent = view.description;
+      dialogDescription.textContent = key === 'ringkasan'
+        ? `Ringkasan KPI ${periodSelect.options[periodSelect.selectedIndex].text}. Grafik, komposisi, dan transaksi adalah snapshot data dummy ${demoSnapshot.snapshotLabel}.`
+        : view.description;
       dialogContent.replaceChildren();
       if (view.columns && view.rows) {
         const wrapper = document.createElement('div');
@@ -611,19 +613,16 @@
       sidebar.querySelector('[data-view]')?.focus();
     });
     menuBackdrop.addEventListener('click', () => closeMobileMenu(true));
-    window.addEventListener('keydown', (event) => {
-      if (!sidebar.classList.contains('open') || dialog.open) return;
-      if (event.key === 'Escape') {
-        closeMobileMenu(true);
-        return;
-      }
+
+    function trapFocus(event, container) {
       if (event.key !== 'Tab') return;
-      const focusable = Array.from(sidebar.querySelectorAll('button:not([disabled]), a[href], select, [tabindex]:not([tabindex="-1"])'))
+      const selector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [contenteditable="true"], [tabindex]:not([tabindex="-1"])';
+      const focusable = Array.from(container.querySelectorAll(selector))
         .filter((element) => element.getClientRects().length > 0);
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (!first || !last) return;
-      if (!sidebar.contains(document.activeElement)) {
+      if (!container.contains(document.activeElement) || !focusable.includes(document.activeElement)) {
         event.preventDefault();
         (event.shiftKey ? last : first).focus();
       } else if (event.shiftKey && document.activeElement === first) {
@@ -633,6 +632,19 @@
         event.preventDefault();
         first.focus();
       }
+    }
+
+    window.addEventListener('keydown', (event) => {
+      if (dialog.open) {
+        trapFocus(event, dialog);
+        return;
+      }
+      if (!sidebar.classList.contains('open')) return;
+      if (event.key === 'Escape') {
+        closeMobileMenu(true);
+        return;
+      }
+      trapFocus(event, sidebar);
     });
     window.addEventListener('resize', () => {
       if (window.innerWidth > 600 && sidebar.classList.contains('open')) closeMobileMenu();
@@ -669,7 +681,7 @@
         const cells = Array.from(row.cells, (cell) => {
           const member = cell.querySelector('.member');
           if (member) return Array.from(member.querySelectorAll('strong, small'), (part) => part.textContent.trim()).join(' ');
-          return cell.textContent.trim();
+          return cell.textContent;
         });
         const amount = normalizeIndonesianAmount(cells[3]);
         if (amount === null) {
@@ -685,7 +697,7 @@
       }
       const escapeCell = (value) => {
         if (/^-?\d+(?:\.\d+)?$/.test(value)) return value;
-        const safeValue = /^[\t\r\n ]*[=+\-@]/.test(value) ? `'${value}` : value;
+        const safeValue = /^[\t\r]/.test(value) || /^[\t\r\n ]*[=+\-@]/.test(value) ? `'${value}` : value;
         return `"${safeValue.replaceAll('"', '""')}"`;
       };
       const csv = `\uFEFF${rows.map((row) => row.map(escapeCell).join(',')).join('\r\n')}`;
