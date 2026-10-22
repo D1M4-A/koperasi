@@ -388,7 +388,9 @@
     <div class="dialog-head"><div><h2 id="dialog-title"></h2><p id="dialog-description"></p></div><button type="button" class="dialog-close">Tutup</button></div>
     <div class="dialog-body" id="dialog-content"></div>
   </dialog>
+  <script src="./dashboard-export.js"></script>
   <script>
+    const { normalizeIndonesianAmount, escapeCsvCell } = window.KoperasiCsv;
     const demoSnapshot = document.querySelector('.layout').dataset;
     document.querySelectorAll('[data-snapshot-period]').forEach((element) => {
       element.textContent = demoSnapshot.snapshotLabel;
@@ -486,6 +488,7 @@
       main.inert = false;
       mobileBottom.inert = false;
       menuButton.setAttribute('aria-expanded', 'false');
+      setActiveView(activeView);
       if (restoreFocus && window.innerWidth <= 600) menuButton.focus();
     }
 
@@ -510,7 +513,7 @@
       }
       dialogTitle.textContent = view.title;
       dialogDescription.textContent = key === 'ringkasan'
-        ? `Ringkasan KPI ${periodSelect.options[periodSelect.selectedIndex].text}. Grafik, komposisi, dan transaksi adalah snapshot data dummy ${demoSnapshot.snapshotLabel}.`
+        ? `Kartu KPI mengikuti periode ${periodSelect.options[periodSelect.selectedIndex].text}. Grafik, komposisi, transaksi, dan CSV adalah snapshot data dummy ${demoSnapshot.snapshotLabel}.`
         : view.description;
       dialogContent.replaceChildren();
       if (view.columns && view.rows) {
@@ -663,23 +666,6 @@
       selectedPeriodLabel.textContent = periodSelect.options[periodSelect.selectedIndex].text;
     });
 
-    function normalizeIndonesianAmount(value) {
-      const amount = value.trim().match(/^([+-]?)\s*(?:Rp\s*([+-]?)\s*)?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?\s*(juta|jt|miliar|m)?$/i);
-      if (!amount) return null;
-      if (amount[1] && amount[2] && amount[1] !== amount[2]) return null;
-      const sign = amount[1] === '-' || amount[2] === '-' ? '-' : '';
-      const whole = amount[3].replace(/\./g, '');
-      const fraction = amount[4] || '';
-      const decimalScale = 10n ** BigInt(fraction.length);
-      const suffix = amount[5]?.toLowerCase();
-      const multiplier = suffix === 'jt' || suffix === 'juta' ? 1000000n : suffix === 'm' || suffix === 'miliar' ? 1000000000n : 1n;
-      const scaledAmount = (BigInt(whole) * decimalScale + BigInt(fraction || '0')) * multiplier;
-      const digits = scaledAmount.toString().padStart(fraction.length + 1, '0');
-      const integerPart = fraction ? digits.slice(0, -fraction.length) : digits;
-      const decimalPart = fraction ? digits.slice(-fraction.length).replace(/0+$/, '') : '';
-      return `${sign}${integerPart}${decimalPart ? `.${decimalPart}` : ''}`;
-    }
-
     document.querySelector('[data-action="export"]').addEventListener('click', () => {
       exportStatus.textContent = '';
       const rows = [['Anggota', 'Jenis transaksi', 'Tanggal', 'Nominal (Rp)', 'Status']];
@@ -702,12 +688,7 @@
         exportStatus.textContent = 'Laporan tidak diunduh: ada nominal dengan format yang belum dikenali.';
         return;
       }
-      const escapeCell = (value) => {
-        if (/^-?\d+(?:\.\d+)?$/.test(value)) return value;
-        const safeValue = /^[\t\r]/.test(value) || /^[\t\r\n ]*[=+\-@]/.test(value) ? `'${value}` : value;
-        return `"${safeValue.replaceAll('"', '""')}"`;
-      };
-      const csv = `\uFEFF${rows.map((row) => row.map(escapeCell).join(',')).join('\r\n')}`;
+      const csv = `\uFEFF${rows.map((row) => row.map(escapeCsvCell).join(',')).join('\r\n')}`;
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       const link = document.createElement('a');
       link.href = url;
