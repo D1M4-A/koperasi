@@ -177,7 +177,7 @@
     .demo-card span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
     .demo-note { margin: 15px 0 0; padding: 11px 13px; border-radius: 9px; background: var(--blue-soft); color: #536fbd; font-size: 11px; }
     .menu-backdrop { display: none; }
-    .menu-backdrop.open { display: block; position: fixed; z-index: 4; inset: 0; border: 0; background: rgba(20,31,51,.35); }
+    .menu-backdrop.open { display: block; }
     @media (min-width: 1500px) { .content { padding-top: 40px; } }
     @media (max-width: 1120px) {
       .sidebar { width: 220px; }
@@ -207,7 +207,8 @@
     }
     @media (max-width: 600px) {
       .sidebar { display: none; }
-      .sidebar.open { display: flex; width: min(280px,85vw); align-items: stretch; padding: 22px 16px 18px; }
+      .sidebar.open { z-index: 5; display: flex; width: min(280px,85vw); align-items: stretch; padding: 22px 16px 18px; }
+      .menu-backdrop.open { position: fixed; z-index: 4; inset: 0; border: 0; background: rgba(20,31,51,.35); }
       .sidebar.open .brand { align-items: center; padding: 0 10px 24px; }
       .sidebar.open .brand-copy, .sidebar.open .nav-label, .sidebar.open .help-card, .sidebar.open .user-mini > div:last-child { display: block; }
       .sidebar.open .nav button .nav-text { display: inline; }
@@ -380,8 +381,8 @@
     <button data-view="pinjaman"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4zM4 10h16M8 4v6M16 4v6"/></svg>Pinjaman</button>
     <button data-view="laporan"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>Laporan</button>
   </nav>
-  <dialog class="demo-dialog" aria-labelledby="dialog-title">
-    <div class="dialog-head"><div><h2 id="dialog-title"></h2><p id="dialog-description"></p></div><button type="button" class="dialog-close" aria-label="Tutup">Tutup</button></div>
+  <dialog class="demo-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description">
+    <div class="dialog-head"><div><h2 id="dialog-title"></h2><p id="dialog-description"></p></div><button type="button" class="dialog-close">Tutup</button></div>
     <div class="dialog-body" id="dialog-content"></div>
   </dialog>
   <script>
@@ -394,7 +395,7 @@
       },
       simpanan: {
         title: 'Simpanan Anggota',
-        description: 'Ringkasan saldo simpanan dummy berdasarkan jenis simpanan.',
+        description: 'Snapshot Oktober 2026: ringkasan saldo simpanan dummy berdasarkan jenis simpanan.',
         columns: ['Jenis simpanan', 'Jumlah anggota', 'Saldo'],
         rows: [['Pokok', '1.248', 'Rp 1,16 M'], ['Wajib', '1.192', 'Rp 824 jt'], ['Sukarela', '462', 'Rp 539 jt'], ['Deposito', '87', 'Rp 311 jt']]
       },
@@ -406,7 +407,7 @@
       },
       laporan: {
         title: 'Laporan Koperasi',
-        description: 'Pratinjau laporan keuangan periode yang sedang dipilih.',
+        description: 'Pratinjau laporan keuangan data dummy Oktober 2026.',
         columns: ['Indikator', 'Nilai dummy', 'Perubahan'],
         rows: [['Total simpanan', 'Rp 2,84 M', '+6,2%'], ['Pinjaman berjalan', 'Rp 1,26 M', '−2,1%'], ['Estimasi SHU', 'Rp 186,5 jt', '+8,4%'], ['Anggota aktif', '1.248', '+4,8%']]
       },
@@ -422,8 +423,7 @@
       },
       ringkasan: {
         title: 'Ringkasan Koperasi',
-        description: 'Snapshot indikator utama dan fokus tindak lanjut untuk pengurus.',
-        cards: [['Anggota', '1.248 anggota · tumbuh 4,8% bulan ini'], ['Simpanan', 'Rp 2,84 M · naik 6,2% dibanding bulan lalu'], ['Pinjaman', 'Rp 1,26 M berjalan · 8 pengajuan perlu ditinjau'], ['Estimasi SHU', 'Rp 186,5 jt · progres positif 8,4%']]
+        description: 'Indikator utama koperasi berdasarkan periode terpilih.'
       },
       notifikasi: {
         title: 'Notifikasi',
@@ -433,7 +433,7 @@
       },
       transaksi: {
         title: 'Semua Transaksi',
-        description: 'Contoh transaksi terbaru untuk periode terpilih.',
+        description: 'Contoh transaksi terbaru pada snapshot Oktober 2026.',
         columns: ['Anggota', 'Jenis', 'Tanggal', 'Nominal', 'Status'],
         rows: [['Budi Prasetyo', 'Simpanan wajib', '22 Okt 2026', '+ Rp 250.000', 'Berhasil'], ['Siti Nurhaliza', 'Angsuran pinjaman', '22 Okt 2026', '+ Rp 1.500.000', 'Berhasil'], ['Ahmad Hidayat', 'Pengajuan pinjaman', '21 Okt 2026', 'Rp 15.000.000', 'Menunggu'], ['Dewi Wulandari', 'Simpanan sukarela', '21 Okt 2026', '+ Rp 750.000', 'Berhasil'], ['Rizky Firmansyah', 'Simpanan pokok', '20 Okt 2026', '+ Rp 500.000', 'Berhasil']]
       },
@@ -502,7 +502,7 @@
         wrapper.append(table);
         dialogContent.append(wrapper);
       }
-      if (view.cards) {
+      if (view.cards || key === 'ringkasan') {
         const cards = document.createElement('div');
         cards.className = 'demo-cards';
         const cardData = key === 'ringkasan'
@@ -537,17 +537,18 @@
     document.querySelectorAll('[data-view]').forEach((button) => {
       button.addEventListener('click', () => {
         const key = button.dataset.view;
-        document.querySelectorAll('[data-view]').forEach((item) => {
-          const active = item.dataset.view === key;
-          item.classList.toggle('active', active);
-          if (active) item.setAttribute('aria-current', 'page');
-          else item.removeAttribute('aria-current');
-        });
-        closeMobileMenu();
         if (key === 'dashboard') {
+          document.querySelectorAll('[data-view]').forEach((item) => {
+            const active = item.dataset.view === key;
+            item.classList.toggle('active', active);
+            if (active) item.setAttribute('aria-current', 'page');
+            else item.removeAttribute('aria-current');
+          });
+          closeMobileMenu();
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
+        closeMobileMenu();
         showDemoView(key);
       });
     });
@@ -594,12 +595,14 @@
     });
 
     document.querySelector('[data-action="export"]').addEventListener('click', () => {
-      const rows = [['Anggota', 'Jenis transaksi', 'Tanggal', 'Nominal', 'Status']];
+      const rows = [['Anggota', 'Jenis transaksi', 'Tanggal', 'Nominal (Rp)', 'Status']];
       document.querySelectorAll('.table-panel tbody tr').forEach((row) => {
-        rows.push(Array.from(row.cells, (cell) => cell.innerText.trim()));
+        const cells = Array.from(row.cells, (cell) => cell.textContent.trim());
+        cells[3] = cells[3].replace(/^\+\s*/, '').replace(/^Rp\s*/, '').replace(/[^\d-]/g, '');
+        rows.push(cells);
       });
       const escapeCell = (value) => {
-        const safeValue = /^[\s]*[=+\-@]/.test(value) ? `'${value}` : value;
+        const safeValue = /^[\t\r\n ]*[=+\-@]/.test(value) ? `'${value}` : value;
         return `"${safeValue.replaceAll('"', '""')}"`;
       };
       const csv = `\uFEFF${rows.map((row) => row.map(escapeCell).join(',')).join('\r\n')}`;
