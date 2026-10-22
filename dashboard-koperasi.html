@@ -301,7 +301,7 @@
       </header>
       <div class="content">
         <section class="page-heading">
-          <div><h1>Dashboard</h1><p>Ringkasan kesehatan koperasi dan aktivitas hari ini.</p></div>
+          <div><h1>Dashboard</h1><p>Pilih periode untuk memperbarui KPI; grafik, komposisi, dan transaksi adalah snapshot data dummy Oktober 2026.</p></div>
           <div class="heading-actions"><select class="select" aria-label="Pilih periode"><option>Oktober 2026</option><option>September 2026</option><option>Agustus 2026</option></select><button class="export-btn" type="button" data-action="export"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M5 17v4h14v-4"/></svg>Unduh laporan</button></div>
         </section>
         <section class="welcome">
@@ -460,10 +460,11 @@
     const periodSelect = document.querySelector('.heading-actions select');
     const metricValues = document.querySelectorAll('.metric-value');
     const periodData = {
-      'Oktober 2026': ['1.248', 'Rp 2,84 M', 'Rp 1,26 M', 'Rp 186,5 jt'],
-      'September 2026': ['1.239', 'Rp 2,67 M', 'Rp 1,29 M', 'Rp 172,1 jt'],
-      'Agustus 2026': ['1.226', 'Rp 2,52 M', 'Rp 1,31 M', 'Rp 158,8 jt']
+      'Oktober 2026': { values: ['1.248', 'Rp 2,84 M', 'Rp 1,26 M', 'Rp 186,5 jt'], trends: ['↗ 4,8%', '↗ 6,2%', '↘ 2,1%', '↗ 8,4%'] },
+      'September 2026': { values: ['1.239', 'Rp 2,67 M', 'Rp 1,29 M', 'Rp 172,1 jt'], trends: ['↗ 4,1%', '↗ 5,9%', '↘ 1,8%', '↗ 7,8%'] },
+      'Agustus 2026': { values: ['1.226', 'Rp 2,52 M', 'Rp 1,31 M', 'Rp 158,8 jt'], trends: ['↗ 3,2%', '↗ 5,4%', '↘ 1,5%', '↗ 7,1%'] }
     };
+    let dialogOpener = null;
 
     function closeMobileMenu(restoreFocus = false) {
       sidebar.classList.remove('open');
@@ -475,8 +476,9 @@
     function showDemoView(key) {
       const view = demoViews[key];
       if (!view) return;
+      dialogOpener = document.activeElement;
       dialogTitle.textContent = view.title;
-      dialogDescription.textContent = `${view.description} Periode: ${periodSelect.value}.`;
+      dialogDescription.textContent = view.description;
       dialogContent.replaceChildren();
       if (view.columns && view.rows) {
         const wrapper = document.createElement('div');
@@ -503,7 +505,15 @@
       if (view.cards) {
         const cards = document.createElement('div');
         cards.className = 'demo-cards';
-        view.cards.forEach(([title, description]) => {
+        const cardData = key === 'ringkasan'
+          ? [
+              ['Anggota', `${metricValues[0].textContent} anggota terdaftar`],
+              ['Simpanan', `${metricValues[1].textContent} total simpanan`],
+              ['Pinjaman', `${metricValues[2].textContent} saldo berjalan`],
+              ['Estimasi SHU', metricValues[3].textContent]
+            ]
+          : view.cards;
+        cardData.forEach(([title, description]) => {
           const card = document.createElement('article');
           card.className = 'demo-card';
           const heading = document.createElement('strong');
@@ -550,6 +560,10 @@
     dialog.addEventListener('click', (event) => {
       if (event.target === dialog) dialog.close();
     });
+    dialog.addEventListener('close', () => {
+      if (dialogOpener && sidebar.contains(dialogOpener) && window.innerWidth <= 600) menuButton.focus();
+      dialogOpener = null;
+    });
 
     menuButton.addEventListener('click', () => {
       const isOpen = !sidebar.classList.contains('open');
@@ -558,8 +572,8 @@
         return;
       }
       sidebar.classList.add('open');
-      menuBackdrop.classList.toggle('open', isOpen);
-      menuButton.setAttribute('aria-expanded', String(isOpen));
+      menuBackdrop.classList.add('open');
+      menuButton.setAttribute('aria-expanded', 'true');
       sidebar.querySelector('[data-view]')?.focus();
     });
     menuBackdrop.addEventListener('click', () => closeMobileMenu(true));
@@ -570,15 +584,13 @@
       if (window.innerWidth > 600 && sidebar.classList.contains('open')) closeMobileMenu();
     });
 
-    const savingsTotal = document.querySelector('.donut-center strong');
-    const chartPeriod = document.querySelector('.chart-foot strong');
-
     periodSelect.addEventListener('change', () => {
-      const values = periodData[periodSelect.value];
-      if (!values) return;
-      metricValues.forEach((metric, index) => { metric.textContent = values[index]; });
-      if (savingsTotal) savingsTotal.textContent = values[1];
-      if (chartPeriod) chartPeriod.textContent = `Mei – ${periodSelect.value}`;
+      const period = periodData[periodSelect.value];
+      if (!period) return;
+      metricValues.forEach((metric, index) => { metric.textContent = period.values[index]; });
+      document.querySelectorAll('.metric-foot .trend').forEach((trend, index) => {
+        trend.textContent = period.trends[index];
+      });
     });
 
     document.querySelector('[data-action="export"]').addEventListener('click', () => {
@@ -586,7 +598,11 @@
       document.querySelectorAll('.table-panel tbody tr').forEach((row) => {
         rows.push(Array.from(row.cells, (cell) => cell.innerText.trim()));
       });
-      const csv = `\uFEFF${rows.map((row) => row.map((value) => `"${value.replaceAll('"', '""')}"`).join(',')).join('\r\n')}`;
+      const escapeCell = (value) => {
+        const safeValue = /^[\s]*[=+\-@]/.test(value) ? `'${value}` : value;
+        return `"${safeValue.replaceAll('"', '""')}"`;
+      };
+      const csv = `\uFEFF${rows.map((row) => row.map(escapeCell).join(',')).join('\r\n')}`;
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       const link = document.createElement('a');
       link.href = url;
