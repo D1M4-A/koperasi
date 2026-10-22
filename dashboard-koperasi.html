@@ -156,6 +156,29 @@
     .activity time { padding-top: 2px; color: #a1aaba; font-size: 9px; white-space: nowrap; }
     .footnote { margin: 18px 2px 0; color: #9ba5b5; font-size: 10px; }
     button:focus-visible, select:focus-visible { outline: 3px solid #b8cbff; outline-offset: 2px; }
+    .demo-cta { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 17px; padding: 17px 20px; border: 1px solid #dce8fc; border-radius: 13px; background: linear-gradient(105deg,#f0f5ff,#f9fbff 72%); }
+    .demo-cta strong { display: block; font-size: 13px; }
+    .demo-cta p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+    .demo-cta button, .dialog-close { border: 0; border-radius: 8px; background: var(--blue); color: white; font-size: 11px; font-weight: 700; padding: 10px 13px; }
+    .demo-dialog { width: min(720px, calc(100% - 28px)); max-height: min(80vh, 720px); padding: 0; border: 0; border-radius: 16px; color: var(--ink); box-shadow: 0 24px 80px rgba(25,36,58,.24); }
+    .demo-dialog::backdrop { background: rgba(20,31,51,.48); backdrop-filter: blur(2px); }
+    .dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 22px 15px; border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font-size: 18px; }
+    .dialog-head p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .dialog-close { flex: 0 0 auto; padding: 8px 11px; background: var(--blue-soft); color: var(--blue); }
+    .dialog-body { max-height: calc(80vh - 84px); overflow: auto; padding: 18px 22px 22px; }
+    .demo-table-wrap { overflow-x: auto; }
+    .demo-table { width: 100%; min-width: 440px; border-collapse: collapse; text-align: left; }
+    .demo-table th, .demo-table td { padding: 11px 12px; border-bottom: 1px solid #f0f2f6; color: #536078; font-size: 11px; white-space: nowrap; }
+    .demo-table th { background: #fafbfd; color: #8994a6; font-size: 9px; letter-spacing: .5px; text-transform: uppercase; }
+    .demo-cards { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+    .demo-card { padding: 13px; border: 1px solid var(--line); border-radius: 10px; background: #fbfcfe; }
+    .demo-card strong { display: block; font-size: 12px; }
+    .demo-card span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .demo-note { margin: 15px 0 0; padding: 11px 13px; border-radius: 9px; background: var(--blue-soft); color: #536fbd; font-size: 11px; }
+    .sidebar.open { display: flex; }
+    .menu-backdrop { display: none; }
+    .menu-backdrop.open { display: block; position: fixed; z-index: 4; inset: 0; border: 0; background: rgba(20,31,51,.35); }
     @media (min-width: 1500px) { .content { padding-top: 40px; } }
     @media (max-width: 1120px) {
       .sidebar { width: 220px; }
@@ -185,6 +208,13 @@
     }
     @media (max-width: 600px) {
       .sidebar { display: none; }
+      .sidebar.open { display: flex; width: min(280px,85vw); align-items: stretch; padding: 22px 16px 18px; }
+      .sidebar.open .brand { align-items: center; padding: 0 10px 24px; }
+      .sidebar.open .brand-copy, .sidebar.open .nav-label, .sidebar.open .nav button .nav-text, .sidebar.open .nav .count, .sidebar.open .help-card, .sidebar.open .user-mini > div:last-child { display: initial; }
+      .sidebar.open .nav-label { display: block; }
+      .sidebar.open .brand { justify-content: flex-start; }
+      .sidebar.open .nav button { justify-content: flex-start; }
+      .sidebar.open .user-mini { justify-content: flex-start; padding-inline: 7px; }
       main { margin-left: 0; padding-bottom: 65px; }
       .topbar { height: 62px; padding: 0 17px; }
       .mobile-brand { display: flex; align-items: center; gap: 8px; font-weight: 750; font-size: 13px; }
@@ -222,6 +252,11 @@
       td { padding: 11px 13px; }
       .table-panel .panel-head { padding-inline: 14px; }
       .activity-list { padding-inline: 14px; }
+      .demo-cta { align-items: flex-start; flex-direction: column; padding: 15px; }
+      .demo-dialog { max-height: 85vh; }
+      .dialog-head { padding: 17px 16px 13px; }
+      .dialog-body { max-height: calc(85vh - 78px); padding: 15px 16px 18px; }
+      .demo-cards { grid-template-columns: 1fr; }
       .mobile-bottom { position: fixed; z-index: 4; inset: auto 0 0; display: flex; justify-content: space-around; padding: 8px 5px max(8px,env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgba(255,255,255,.96); }
       .mobile-bottom button { display: grid; justify-items: center; gap: 2px; border: 0; background: none; color: #8994a6; font-size: 9px; }
       .mobile-bottom button.active { color: var(--blue); font-weight: 700; }
@@ -241,35 +276,36 @@
       </div>
       <div class="nav-label">Menu utama</div>
       <nav class="nav">
-        <button class="active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg><span class="nav-text">Dashboard</span></button>
-        <button><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h3a4.5 4.5 0 0 1 4.5 4.5V20M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.3a4.5 4.5 0 0 1 3 4.2V20"/></svg><span class="nav-text">Data Anggota</span></button>
-        <button><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/><circle cx="8" cy="6.5" r="1.5" fill="white"/><circle cx="15" cy="12" r="1.5" fill="white"/><circle cx="10" cy="17.5" r="1.5" fill="white"/></svg><span class="nav-text">Simpanan</span></button>
-        <button><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4zM4 10h16M8 4v6M16 4v6"/><path d="M8 14h3M8 17h6"/></svg><span class="nav-text">Pinjaman</span><span class="count">8</span></button>
-        <button><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/><path d="M16 6h4v4"/></svg><span class="nav-text">Laporan</span></button>
+        <button class="active" aria-current="page" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg><span class="nav-text">Dashboard</span></button>
+        <button data-view="anggota"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h3a4.5 4.5 0 0 1 4.5 4.5V20M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.3a4.5 4.5 0 0 1 3 4.2V20"/></svg><span class="nav-text">Data Anggota</span></button>
+        <button data-view="simpanan"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/><circle cx="8" cy="6.5" r="1.5" fill="white"/><circle cx="15" cy="12" r="1.5" fill="white"/><circle cx="10" cy="17.5" r="1.5" fill="white"/></svg><span class="nav-text">Simpanan</span></button>
+        <button data-view="pinjaman"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4zM4 10h16M8 4v6M16 4v6"/><path d="M8 14h3M8 17h6"/></svg><span class="nav-text">Pinjaman</span><span class="count">8</span></button>
+        <button data-view="laporan"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/><path d="M16 6h4v4"/></svg><span class="nav-text">Laporan</span></button>
       </nav>
       <div class="nav-label" style="margin-top:27px">Pengaturan</div>
       <nav class="nav">
-        <button><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z"/></svg><span class="nav-text">Pengaturan</span></button>
+        <button data-view="pengaturan"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z"/></svg><span class="nav-text">Pengaturan</span></button>
       </nav>
       <div class="sidebar-bottom">
-        <div class="help-card"><strong>Butuh bantuan?</strong><p>Hubungi tim pengelola koperasi untuk bantuan.</p><button type="button">Lihat panduan →</button></div>
+        <div class="help-card"><strong>Butuh bantuan?</strong><p>Hubungi tim pengelola koperasi untuk bantuan.</p><button type="button" data-demo-view="panduan">Lihat panduan →</button></div>
         <div class="user-mini"><div class="avatar">RA</div><div><strong>Rina Amalia</strong><small>Administrator</small></div></div>
       </div>
     </aside>
+    <button type="button" class="menu-backdrop" aria-label="Tutup menu"></button>
     <main>
       <header class="topbar">
         <div class="crumb">Koperasi / <b>Dashboard</b></div>
         <div class="mobile-brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5"/><path d="M5.5 9.5V20h13V9.5M9 20v-6h6v6"/></svg></div>Koperasi Sejahtera</div>
-        <div class="top-actions"><span class="top-date">Rabu, 22 Oktober 2026</span><button class="icon-btn" aria-label="Notifikasi"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i class="notification-dot"></i></button><button class="mobile-menu" aria-label="Buka menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+        <div class="top-actions"><span class="top-date">Rabu, 22 Oktober 2026</span><button class="icon-btn" aria-label="Notifikasi" data-demo-view="notifikasi"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i class="notification-dot"></i></button><button class="mobile-menu" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
       </header>
       <div class="content">
         <section class="page-heading">
           <div><h1>Dashboard</h1><p>Ringkasan kesehatan koperasi dan aktivitas hari ini.</p></div>
-          <div class="heading-actions"><select class="select" aria-label="Pilih periode"><option>Oktober 2026</option><option>September 2026</option><option>Agustus 2026</option></select><button class="export-btn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M5 17v4h14v-4"/></svg>Unduh laporan</button></div>
+          <div class="heading-actions"><select class="select" aria-label="Pilih periode"><option>Oktober 2026</option><option>September 2026</option><option>Agustus 2026</option></select><button class="export-btn" type="button" data-action="export"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M5 17v4h14v-4"/></svg>Unduh laporan</button></div>
         </section>
         <section class="welcome">
           <div class="welcome-copy"><div class="welcome-icon" aria-hidden="true">✦</div><div><strong>Selamat pagi, Bu Rina 👋</strong><p>Berikut perkembangan Koperasi Sejahtera bulan ini.</p></div></div>
-          <button type="button" class="welcome-link">Lihat ringkasan →</button>
+          <button type="button" class="welcome-link" data-demo-view="ringkasan">Lihat ringkasan →</button>
         </section>
         <section class="metrics" aria-label="Ringkasan koperasi">
           <article class="metric"><div class="metric-head"><span class="metric-title">Total Anggota</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5A4.5 4.5 0 0 1 7 14h4a4.5 4.5 0 0 1 4.5 4.5V20M16 11a3.5 3.5 0 1 0 0-6.5M17 14h.5a4 4 0 0 1 4 4v2"/></svg></span></div><strong class="metric-value">1.248</strong><div class="metric-foot"><span class="trend">↗ 4,8%</span><span>dibanding bulan lalu</span></div></article>
@@ -311,7 +347,7 @@
         </section>
         <section class="lower-grid">
           <article class="panel table-panel">
-            <div class="panel-head"><div><h2>Transaksi Terbaru</h2><p>Aktivitas keuangan koperasi terkini</p></div><button class="text-link" type="button">Lihat semua →</button></div>
+            <div class="panel-head"><div><h2>Transaksi Terbaru</h2><p>Aktivitas keuangan koperasi terkini</p></div><button class="text-link" type="button" data-demo-view="transaksi">Lihat semua →</button></div>
             <div class="table-scroll"><table>
               <thead><tr><th>Anggota</th><th>Jenis transaksi</th><th>Tanggal</th><th>Nominal</th><th>Status</th></tr></thead>
               <tbody>
@@ -323,7 +359,7 @@
             </table></div>
           </article>
           <article class="panel activity-panel">
-            <div class="panel-head"><div><h2>Aktivitas Terkini</h2><p>Pembaruan operasional koperasi</p></div><button class="text-link" type="button" aria-label="Lihat seluruh aktivitas">•••</button></div>
+            <div class="panel-head"><div><h2>Aktivitas Terkini</h2><p>Pembaruan operasional koperasi</p></div><button class="text-link" type="button" aria-label="Lihat seluruh aktivitas" data-demo-view="aktivitas">•••</button></div>
             <div class="activity-list">
               <div class="activity"><span class="activity-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><div class="activity-copy"><strong>Angsuran pinjaman diterima</strong><span>Siti Nurhaliza · Rp 1.500.000</span></div><time>09:42</time></div>
               <div class="activity"><span class="activity-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg></span><div class="activity-copy"><strong>Pengajuan pinjaman baru</strong><span>Ahmad Hidayat · Rp 15.000.000</span></div><time>09:15</time></div>
@@ -332,15 +368,214 @@
             </div>
           </article>
         </section>
-        <p class="footnote">Dashboard ini menggunakan data contoh untuk keperluan pratinjau.</p>
+        <section class="demo-cta"><div><strong>Ingin proses koperasi yang saling terhubung?</strong><p>Lihat bagaimana modul ERP Odoo dapat mengelola anggota, simpanan, pinjaman, dan laporan dalam satu alur.</p></div><button type="button" data-demo-view="odoo">Jelajahi simulasi Odoo ERP →</button></section>
+        <p class="footnote">Dashboard ini menggunakan data dummy untuk keperluan pratinjau. Tidak terhubung ke sistem produksi.</p>
       </div>
     </main>
   </div>
   <nav class="mobile-bottom" aria-label="Navigasi seluler">
-    <button class="active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg>Dashboard</button>
-    <button><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h3a4.5 4.5 0 0 1 4.5 4.5V20M16 4.7a3.5 3.5 0 0 1 0 6.6"/></svg>Anggota</button>
-    <button><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4zM4 10h16M8 4v6M16 4v6"/></svg>Pinjaman</button>
-    <button><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>Laporan</button>
+    <button class="active" aria-current="page" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg>Dashboard</button>
+    <button data-view="anggota"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h3a4.5 4.5 0 0 1 4.5 4.5V20M16 4.7a3.5 3.5 0 0 1 0 6.6"/></svg>Anggota</button>
+    <button data-view="pinjaman"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4zM4 10h16M8 4v6M16 4v6"/></svg>Pinjaman</button>
+    <button data-view="laporan"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>Laporan</button>
   </nav>
+  <dialog class="demo-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-head"><div><h2 id="dialog-title"></h2><p id="dialog-description"></p></div><button type="button" class="dialog-close" aria-label="Tutup">Tutup</button></div>
+    <div class="dialog-body" id="dialog-content"></div>
+  </dialog>
+  <script>
+    const demoViews = {
+      anggota: {
+        title: 'Data Anggota',
+        description: 'Contoh data anggota koperasi yang dapat dikelola dalam satu sistem.',
+        columns: ['ID Anggota', 'Nama', 'Unit', 'Status'],
+        rows: [['AG-00821', 'Budi Prasetyo', 'Keuangan', 'Aktif'], ['AG-00416', 'Siti Nurhaliza', 'SDM', 'Aktif'], ['AG-01039', 'Ahmad Hidayat', 'Operasional', 'Menunggu verifikasi'], ['AG-00275', 'Dewi Wulandari', 'Layanan', 'Aktif']]
+      },
+      simpanan: {
+        title: 'Simpanan Anggota',
+        description: 'Ringkasan saldo simpanan dummy berdasarkan jenis simpanan.',
+        columns: ['Jenis simpanan', 'Jumlah anggota', 'Saldo'],
+        rows: [['Pokok', '1.248', 'Rp 1,16 M'], ['Wajib', '1.192', 'Rp 824 jt'], ['Sukarela', '462', 'Rp 539 jt'], ['Deposito', '87', 'Rp 311 jt']]
+      },
+      pinjaman: {
+        title: 'Pinjaman',
+        description: 'Contoh status pinjaman dan pengajuan yang perlu ditindaklanjuti.',
+        columns: ['No. Pengajuan', 'Anggota', 'Nominal', 'Status'],
+        rows: [['PJ-2026-104', 'Ahmad Hidayat', 'Rp 15.000.000', 'Menunggu persetujuan'], ['PJ-2026-102', 'Siti Nurhaliza', 'Rp 8.000.000', 'Berjalan'], ['PJ-2026-098', 'Budi Prasetyo', 'Rp 5.000.000', 'Berjalan'], ['PJ-2026-095', 'Dewi Wulandari', 'Rp 12.000.000', 'Lunas']]
+      },
+      laporan: {
+        title: 'Laporan Koperasi',
+        description: 'Pratinjau laporan keuangan periode yang sedang dipilih.',
+        columns: ['Indikator', 'Nilai dummy', 'Perubahan'],
+        rows: [['Total simpanan', 'Rp 2,84 M', '+6,2%'], ['Pinjaman berjalan', 'Rp 1,26 M', '−2,1%'], ['Estimasi SHU', 'Rp 186,5 jt', '+8,4%'], ['Anggota aktif', '1.248', '+4,8%']]
+      },
+      pengaturan: {
+        title: 'Pengaturan Koperasi',
+        description: 'Contoh konfigurasi organisasi untuk demo dashboard.',
+        cards: [['Profil organisasi', 'Koperasi Sejahtera · 1.248 anggota'], ['Periode buku', 'Januari–Desember 2026'], ['Persetujuan pinjaman', '2 tahap: pengurus dan bendahara'], ['Notifikasi', 'Pengajuan dan pembayaran aktif']]
+      },
+      panduan: {
+        title: 'Panduan Dashboard',
+        description: 'Jelajahi data contoh tanpa risiko mengubah data produksi.',
+        cards: [['1. Pilih periode', 'Gunakan filter periode untuk melihat ringkasan bulanan.'], ['2. Buka menu', 'Pilih anggota, simpanan, pinjaman, atau laporan untuk melihat contoh datanya.'], ['3. Unduh laporan', 'Ekspor transaksi dummy ke file CSV yang bisa dibuka di spreadsheet.'], ['4. Eksplorasi Odoo', 'Lihat contoh alur koperasi yang dapat disatukan dalam ERP.']]
+      },
+      ringkasan: {
+        title: 'Ringkasan Koperasi',
+        description: 'Snapshot indikator utama dan fokus tindak lanjut untuk pengurus.',
+        cards: [['Anggota', '1.248 anggota · tumbuh 4,8% bulan ini'], ['Simpanan', 'Rp 2,84 M · naik 6,2% dibanding bulan lalu'], ['Pinjaman', 'Rp 1,26 M berjalan · 8 pengajuan perlu ditinjau'], ['Estimasi SHU', 'Rp 186,5 jt · progres positif 8,4%']]
+      },
+      notifikasi: {
+        title: 'Notifikasi',
+        description: 'Pembaruan terbaru untuk administrator koperasi.',
+        columns: ['Waktu', 'Pemberitahuan', 'Tindakan'],
+        rows: [['09:15', 'Pengajuan pinjaman Ahmad Hidayat', 'Perlu ditinjau'], ['09:42', 'Angsuran Siti Nurhaliza diterima', 'Tercatat'], ['Kemarin', 'Anggota baru Rizky Firmansyah', 'Verifikasi profil']]
+      },
+      transaksi: {
+        title: 'Semua Transaksi',
+        description: 'Contoh transaksi terbaru untuk periode terpilih.',
+        columns: ['Anggota', 'Jenis', 'Tanggal', 'Nominal', 'Status'],
+        rows: [['Budi Prasetyo', 'Simpanan wajib', '22 Okt 2026', '+ Rp 250.000', 'Berhasil'], ['Siti Nurhaliza', 'Angsuran pinjaman', '22 Okt 2026', '+ Rp 1.500.000', 'Berhasil'], ['Ahmad Hidayat', 'Pengajuan pinjaman', '21 Okt 2026', 'Rp 15.000.000', 'Menunggu'], ['Dewi Wulandari', 'Simpanan sukarela', '21 Okt 2026', '+ Rp 750.000', 'Berhasil'], ['Rizky Firmansyah', 'Simpanan pokok', '20 Okt 2026', '+ Rp 500.000', 'Berhasil']]
+      },
+      aktivitas: {
+        title: 'Aktivitas Terkini',
+        description: 'Jejak aktivitas operasional dalam demo koperasi.',
+        cards: [['09:42 · Pembayaran', 'Angsuran Siti Nurhaliza · Rp 1.500.000'], ['09:15 · Persetujuan', 'Pengajuan Ahmad Hidayat menunggu tinjauan'], ['Kemarin · Anggota', 'Rizky Firmansyah terdaftar di Unit Keuangan'], ['Kemarin · Rekonsiliasi', 'Rekap simpanan Oktober berhasil diperbarui']]
+      },
+      odoo: {
+        title: 'Simulasi Koperasi dengan Odoo ERP',
+        description: 'Gambaran modul yang dapat dihubungkan untuk mengurangi pencatatan terpisah.',
+        cards: [['Anggota & CRM', 'Kelola profil anggota, komunikasi, dan riwayat layanan.'], ['Akuntansi', 'Catat simpanan, angsuran, jurnal, dan rekonsiliasi.'], ['Pinjaman & Persetujuan', 'Atur alur pengajuan, verifikasi, jadwal angsuran, dan status.'], ['Laporan & Dashboard', 'Pantau performa koperasi dari data operasional yang terhubung.']],
+        note: 'Ini pratinjau konsep dengan data dummy, bukan implementasi Odoo aktif. Kebutuhan modul dan alur kerja dapat disesuaikan dengan kebijakan koperasi.'
+      }
+    };
+
+    const dialog = document.querySelector('.demo-dialog');
+    const dialogTitle = document.querySelector('#dialog-title');
+    const dialogDescription = document.querySelector('#dialog-description');
+    const dialogContent = document.querySelector('#dialog-content');
+    const sidebar = document.querySelector('.sidebar');
+    const menuBackdrop = document.querySelector('.menu-backdrop');
+    const menuButton = document.querySelector('.mobile-menu');
+    const periodSelect = document.querySelector('.heading-actions select');
+    const metricValues = document.querySelectorAll('.metric-value');
+    const periodData = {
+      'Oktober 2026': ['1.248', 'Rp 2,84 M', 'Rp 1,26 M', 'Rp 186,5 jt'],
+      'September 2026': ['1.239', 'Rp 2,67 M', 'Rp 1,29 M', 'Rp 172,1 jt'],
+      'Agustus 2026': ['1.226', 'Rp 2,52 M', 'Rp 1,31 M', 'Rp 158,8 jt']
+    };
+
+    function closeMobileMenu() {
+      sidebar.classList.remove('open');
+      menuBackdrop.classList.remove('open');
+      menuButton.setAttribute('aria-expanded', 'false');
+    }
+
+    function showDemoView(key) {
+      const view = demoViews[key];
+      if (!view) return;
+      dialogTitle.textContent = view.title;
+      dialogDescription.textContent = `${view.description} Periode: ${periodSelect.value}.`;
+      dialogContent.replaceChildren();
+      if (view.columns && view.rows) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'demo-table-wrap';
+        const table = document.createElement('table');
+        table.className = 'demo-table';
+        const head = table.createTHead().insertRow();
+        view.columns.forEach((column) => {
+          const cell = document.createElement('th');
+          cell.textContent = column;
+          head.append(cell);
+        });
+        const body = table.createTBody();
+        view.rows.forEach((row) => {
+          const tableRow = body.insertRow();
+          row.forEach((value) => {
+            const cell = tableRow.insertCell();
+            cell.textContent = value;
+          });
+        });
+        wrapper.append(table);
+        dialogContent.append(wrapper);
+      }
+      if (view.cards) {
+        const cards = document.createElement('div');
+        cards.className = 'demo-cards';
+        view.cards.forEach(([title, description]) => {
+          const card = document.createElement('article');
+          card.className = 'demo-card';
+          const heading = document.createElement('strong');
+          heading.textContent = title;
+          const detail = document.createElement('span');
+          detail.textContent = description;
+          card.append(heading, detail);
+          cards.append(card);
+        });
+        dialogContent.append(cards);
+      }
+      if (view.note) {
+        const note = document.createElement('p');
+        note.className = 'demo-note';
+        note.textContent = view.note;
+        dialogContent.append(note);
+      }
+      dialog.showModal();
+    }
+
+    document.querySelectorAll('[data-view]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.view;
+        document.querySelectorAll('[data-view]').forEach((item) => {
+          const active = item.dataset.view === key;
+          item.classList.toggle('active', active);
+          if (active) item.setAttribute('aria-current', 'page');
+          else item.removeAttribute('aria-current');
+        });
+        closeMobileMenu();
+        if (key === 'dashboard') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        showDemoView(key);
+      });
+    });
+
+    document.querySelectorAll('[data-demo-view]').forEach((button) => {
+      button.addEventListener('click', () => showDemoView(button.dataset.demoView));
+    });
+
+    document.querySelector('.dialog-close').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+
+    menuButton.addEventListener('click', () => {
+      const isOpen = sidebar.classList.toggle('open');
+      menuBackdrop.classList.toggle('open', isOpen);
+      menuButton.setAttribute('aria-expanded', String(isOpen));
+    });
+    menuBackdrop.addEventListener('click', closeMobileMenu);
+
+    periodSelect.addEventListener('change', () => {
+      const values = periodData[periodSelect.value];
+      metricValues.forEach((metric, index) => { metric.textContent = values[index]; });
+      document.querySelector('.donut-center strong').textContent = values[1];
+      document.querySelector('.chart-foot strong').textContent = `Mei – ${periodSelect.value}`;
+    });
+
+    document.querySelector('[data-action="export"]').addEventListener('click', () => {
+      const rows = [['Anggota', 'Jenis transaksi', 'Tanggal', 'Nominal', 'Status']];
+      document.querySelectorAll('.table-panel tbody tr').forEach((row) => {
+        rows.push(Array.from(row.cells, (cell) => cell.innerText.trim()));
+      });
+      const csv = `\\uFEFF${rows.map((row) => row.map((value) => `"${value.replaceAll('"', '""')}"`).join(',')).join('\\r\\n')}`;
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `laporan-koperasi-${periodSelect.value.toLowerCase().replaceAll(' ', '-')}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
 </body>
 </html>
