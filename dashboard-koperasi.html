@@ -309,7 +309,7 @@
         </section>
         <p class="export-status" role="status" aria-live="polite"></p>
         <section class="welcome">
-          <div class="welcome-copy"><div class="welcome-icon" aria-hidden="true">✦</div><div><strong>Selamat pagi, Bu Rina 👋</strong><p>Berikut perkembangan Koperasi Sejahtera bulan ini.</p></div></div>
+          <div class="welcome-copy"><div class="welcome-icon" aria-hidden="true">✦</div><div><strong>Selamat pagi, Bu Rina 👋</strong><p>Ringkasan KPI periode <span data-selected-period>Oktober 2026</span>.</p></div></div>
           <button type="button" class="welcome-link" data-demo-view="ringkasan">Lihat ringkasan →</button>
         </section>
         <section class="metrics" aria-label="Ringkasan koperasi">
@@ -469,6 +469,7 @@
     const main = document.querySelector('main');
     const mobileBottom = document.querySelector('.mobile-bottom');
     const periodSelect = document.querySelector('.heading-actions select');
+    const selectedPeriodLabel = document.querySelector('[data-selected-period]');
     const metricValues = document.querySelectorAll('.metric-value');
     const periodData = {
       '2026-10': { values: ['1.248', 'Rp 2,84 M', 'Rp 1,26 M', 'Rp 186,5 jt'], trends: ['↗ 4,8%', '↗ 6,2%', '↘ 2,1%', '↗ 8,4%'] },
@@ -490,6 +491,7 @@
 
     function setActiveView(key) {
       activeView = key;
+      // The sidebar and bottom nav share view keys; mark only the visible, non-inert copy as current.
       document.querySelectorAll('[data-view]').forEach((item) => {
         const active = item.dataset.view === key && item.getClientRects().length > 0 && !item.closest('[inert]');
         item.classList.toggle('active', active);
@@ -658,19 +660,24 @@
       document.querySelectorAll('.metric-foot .trend').forEach((trend, index) => {
         trend.textContent = period.trends[index];
       });
+      selectedPeriodLabel.textContent = periodSelect.options[periodSelect.selectedIndex].text;
     });
 
     function normalizeIndonesianAmount(value) {
-      const amount = value.trim().match(/^([+-]?)\s*(?:Rp\s*)?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?\s*(jt|juta|m|miliar)?$/i);
+      const amount = value.trim().match(/^([+-]?)\s*(?:Rp\s*([+-]?)\s*)?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?\s*(juta|jt|miliar|m)?$/i);
       if (!amount) return null;
-      const sign = amount[1] === '+' ? '' : amount[1];
-      const whole = amount[2].replace(/\./g, '');
-      const numericValue = Number(`${whole}${amount[3] ? `.${amount[3]}` : ''}`);
-      const suffix = amount[4]?.toLowerCase();
-      const multiplier = suffix === 'jt' || suffix === 'juta' ? 1000000 : suffix === 'm' || suffix === 'miliar' ? 1000000000 : 1;
-      const normalizedValue = numericValue * multiplier;
-      const normalizedText = Number.isInteger(normalizedValue) ? String(normalizedValue) : String(Number(normalizedValue.toFixed(2)));
-      return `${sign}${normalizedText}`;
+      if (amount[1] && amount[2] && amount[1] !== amount[2]) return null;
+      const sign = amount[1] === '-' || amount[2] === '-' ? '-' : '';
+      const whole = amount[3].replace(/\./g, '');
+      const fraction = amount[4] || '';
+      const decimalScale = 10n ** BigInt(fraction.length);
+      const suffix = amount[5]?.toLowerCase();
+      const multiplier = suffix === 'jt' || suffix === 'juta' ? 1000000n : suffix === 'm' || suffix === 'miliar' ? 1000000000n : 1n;
+      const scaledAmount = (BigInt(whole) * decimalScale + BigInt(fraction || '0')) * multiplier;
+      const digits = scaledAmount.toString().padStart(fraction.length + 1, '0');
+      const integerPart = fraction ? digits.slice(0, -fraction.length) : digits;
+      const decimalPart = fraction ? digits.slice(-fraction.length).replace(/0+$/, '') : '';
+      return `${sign}${integerPart}${decimalPart ? `.${decimalPart}` : ''}`;
     }
 
     document.querySelector('[data-action="export"]').addEventListener('click', () => {
