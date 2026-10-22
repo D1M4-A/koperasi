@@ -559,7 +559,7 @@
       if (event.target === dialog) dialog.close();
     });
     dialog.addEventListener('close', () => {
-      if (dialogOpener && sidebar.contains(dialogOpener) && window.innerWidth <= 600) menuButton.focus();
+      if (dialogOpener && !dialogOpener.getClientRects().length && window.innerWidth <= 600) menuButton.focus();
       dialogOpener = null;
     });
 
@@ -621,7 +621,8 @@
           if (member) return Array.from(member.querySelectorAll('strong, small'), (part) => part.textContent.trim()).join(' ');
           return cell.textContent.trim();
         });
-        cells[3] = cells[3].replace(/^\+\s*/, '').replace(/^Rp\s*/, '').replace(/[^\d-]/g, '');
+        const amount = cells[3].match(/^([+-]?)\s*(?:Rp\s*)?([\d.,]+)$/i);
+        if (amount) cells[3] = `${amount[1] === '+' ? '' : amount[1]}${amount[2].replace(/[.,]/g, '')}`;
         rows.push(cells);
       });
       const escapeCell = (value) => {
@@ -633,7 +634,7 @@
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'laporan-koperasi-data-dummy.csv';
+      link.download = 'laporan-transaksi-snapshot-2026-10.csv';
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
