@@ -176,7 +176,6 @@
     .demo-card strong { display: block; font-size: 12px; }
     .demo-card span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
     .demo-note { margin: 15px 0 0; padding: 11px 13px; border-radius: 9px; background: var(--blue-soft); color: #536fbd; font-size: 11px; }
-    .sidebar.open { display: flex; }
     .menu-backdrop { display: none; }
     .menu-backdrop.open { display: block; position: fixed; z-index: 4; inset: 0; border: 0; background: rgba(20,31,51,.35); }
     @media (min-width: 1500px) { .content { padding-top: 40px; } }
@@ -210,7 +209,9 @@
       .sidebar { display: none; }
       .sidebar.open { display: flex; width: min(280px,85vw); align-items: stretch; padding: 22px 16px 18px; }
       .sidebar.open .brand { align-items: center; padding: 0 10px 24px; }
-      .sidebar.open .brand-copy, .sidebar.open .nav-label, .sidebar.open .nav button .nav-text, .sidebar.open .nav .count, .sidebar.open .help-card, .sidebar.open .user-mini > div:last-child { display: initial; }
+      .sidebar.open .brand-copy, .sidebar.open .nav-label, .sidebar.open .help-card, .sidebar.open .user-mini > div:last-child { display: block; }
+      .sidebar.open .nav button .nav-text { display: inline; }
+      .sidebar.open .nav .count { display: grid; }
       .sidebar.open .nav-label { display: block; }
       .sidebar.open .brand { justify-content: flex-start; }
       .sidebar.open .nav button { justify-content: flex-start; }
@@ -267,7 +268,7 @@
 </head>
 <body>
   <div class="layout">
-    <aside class="sidebar" aria-label="Navigasi utama">
+    <aside class="sidebar" id="sidebar-nav" aria-label="Navigasi utama">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5"/><path d="M5.5 9.5V20h13V9.5M9 20v-6h6v6"/><path d="M9 9h.01M15 9h.01"/></svg>
@@ -296,7 +297,7 @@
       <header class="topbar">
         <div class="crumb">Koperasi / <b>Dashboard</b></div>
         <div class="mobile-brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5"/><path d="M5.5 9.5V20h13V9.5M9 20v-6h6v6"/></svg></div>Koperasi Sejahtera</div>
-        <div class="top-actions"><span class="top-date">Rabu, 22 Oktober 2026</span><button class="icon-btn" aria-label="Notifikasi" data-demo-view="notifikasi"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i class="notification-dot"></i></button><button class="mobile-menu" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+        <div class="top-actions"><span class="top-date">Rabu, 22 Oktober 2026</span><button class="icon-btn" aria-label="Notifikasi" data-demo-view="notifikasi"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i class="notification-dot"></i></button><button class="mobile-menu" aria-label="Buka menu" aria-controls="sidebar-nav" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
       </header>
       <div class="content">
         <section class="page-heading">
@@ -464,10 +465,11 @@
       'Agustus 2026': ['1.226', 'Rp 2,52 M', 'Rp 1,31 M', 'Rp 158,8 jt']
     };
 
-    function closeMobileMenu() {
+    function closeMobileMenu(restoreFocus = false) {
       sidebar.classList.remove('open');
       menuBackdrop.classList.remove('open');
       menuButton.setAttribute('aria-expanded', 'false');
+      if (restoreFocus && window.innerWidth <= 600) menuButton.focus();
     }
 
     function showDemoView(key) {
@@ -550,17 +552,33 @@
     });
 
     menuButton.addEventListener('click', () => {
-      const isOpen = sidebar.classList.toggle('open');
+      const isOpen = !sidebar.classList.contains('open');
+      if (!isOpen) {
+        closeMobileMenu(true);
+        return;
+      }
+      sidebar.classList.add('open');
       menuBackdrop.classList.toggle('open', isOpen);
       menuButton.setAttribute('aria-expanded', String(isOpen));
+      sidebar.querySelector('[data-view]')?.focus();
     });
-    menuBackdrop.addEventListener('click', closeMobileMenu);
+    menuBackdrop.addEventListener('click', () => closeMobileMenu(true));
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && sidebar.classList.contains('open')) closeMobileMenu(true);
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 600 && sidebar.classList.contains('open')) closeMobileMenu();
+    });
+
+    const savingsTotal = document.querySelector('.donut-center strong');
+    const chartPeriod = document.querySelector('.chart-foot strong');
 
     periodSelect.addEventListener('change', () => {
       const values = periodData[periodSelect.value];
+      if (!values) return;
       metricValues.forEach((metric, index) => { metric.textContent = values[index]; });
-      document.querySelector('.donut-center strong').textContent = values[1];
-      document.querySelector('.chart-foot strong').textContent = `Mei – ${periodSelect.value}`;
+      if (savingsTotal) savingsTotal.textContent = values[1];
+      if (chartPeriod) chartPeriod.textContent = `Mei – ${periodSelect.value}`;
     });
 
     document.querySelector('[data-action="export"]').addEventListener('click', () => {
@@ -568,11 +586,11 @@
       document.querySelectorAll('.table-panel tbody tr').forEach((row) => {
         rows.push(Array.from(row.cells, (cell) => cell.innerText.trim()));
       });
-      const csv = `\\uFEFF${rows.map((row) => row.map((value) => `"${value.replaceAll('"', '""')}"`).join(',')).join('\\r\\n')}`;
+      const csv = `\uFEFF${rows.map((row) => row.map((value) => `"${value.replaceAll('"', '""')}"`).join(',')).join('\r\n')}`;
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       const link = document.createElement('a');
       link.href = url;
-      link.download = `laporan-koperasi-${periodSelect.value.toLowerCase().replaceAll(' ', '-')}.csv`;
+      link.download = 'laporan-koperasi-data-dummy.csv';
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
