@@ -574,7 +574,7 @@
       link.href = url;
       link.download = `laporan-koperasi-${periodSelect.value.toLowerCase().replaceAll(' ', '-')}.csv`;
       link.click();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
   </script>
 </body>
