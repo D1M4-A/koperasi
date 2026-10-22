@@ -388,9 +388,9 @@
     <div class="dialog-head"><div><h2 id="dialog-title"></h2><p id="dialog-description"></p></div><button type="button" class="dialog-close">Tutup</button></div>
     <div class="dialog-body" id="dialog-content"></div>
   </dialog>
+  <script src="./dashboard-data.js"></script>
   <script src="./dashboard-export.js"></script>
   <script>
-    const { normalizeIndonesianAmount, escapeCsvCell } = window.KoperasiCsv;
     const demoSnapshot = document.querySelector('.layout').dataset;
     document.querySelectorAll('[data-snapshot-period]').forEach((element) => {
       element.textContent = demoSnapshot.snapshotLabel;
@@ -473,11 +473,6 @@
     const periodSelect = document.querySelector('.heading-actions select');
     const selectedPeriodLabel = document.querySelector('[data-selected-period]');
     const metricValues = document.querySelectorAll('.metric-value');
-    const periodData = {
-      '2026-10': { values: ['1.248', 'Rp 2,84 M', 'Rp 1,26 M', 'Rp 186,5 jt'], trends: ['↗ 4,8%', '↗ 6,2%', '↘ 2,1%', '↗ 8,4%'] },
-      '2026-09': { values: ['1.239', 'Rp 2,67 M', 'Rp 1,29 M', 'Rp 172,1 jt'], trends: ['↗ 4,1%', '↗ 5,9%', '↘ 1,8%', '↗ 7,8%'] },
-      '2026-08': { values: ['1.226', 'Rp 2,52 M', 'Rp 1,31 M', 'Rp 158,8 jt'], trends: ['↗ 3,2%', '↗ 5,4%', '↘ 1,5%', '↗ 7,1%'] }
-    };
     let dialogOpener = null;
     let previousActiveView = 'dashboard';
     let activeView = 'dashboard';
@@ -512,9 +507,11 @@
         setActiveView(key);
       }
       dialogTitle.textContent = view.title;
-      dialogDescription.textContent = key === 'ringkasan'
-        ? `Kartu KPI mengikuti periode ${periodSelect.options[periodSelect.selectedIndex].text}. Grafik, komposisi, transaksi, dan CSV adalah snapshot data dummy ${demoSnapshot.snapshotLabel}.`
-        : view.description;
+      const summaryDescription = window.KoperasiDashboardData?.buildSummaryDescription(
+        periodSelect.options[periodSelect.selectedIndex].text,
+        demoSnapshot.snapshotLabel
+      );
+      dialogDescription.textContent = key === 'ringkasan' && summaryDescription ? summaryDescription : view.description;
       dialogContent.replaceChildren();
       if (view.columns && view.rows) {
         const wrapper = document.createElement('div');
@@ -657,7 +654,7 @@
     });
 
     periodSelect.addEventListener('change', () => {
-      const period = periodData[periodSelect.value];
+      const period = window.KoperasiDashboardData?.getPeriodData(periodSelect.value);
       if (!period) return;
       metricValues.forEach((metric, index) => { metric.textContent = period.values[index]; });
       document.querySelectorAll('.metric-foot .trend').forEach((trend, index) => {
@@ -668,6 +665,11 @@
 
     document.querySelector('[data-action="export"]').addEventListener('click', () => {
       exportStatus.textContent = '';
+      const csvHelpers = window.KoperasiCsv;
+      if (!csvHelpers) {
+        exportStatus.textContent = 'Laporan tidak diunduh: modul ekspor tidak tersedia.';
+        return;
+      }
       const rows = [['Anggota', 'Jenis transaksi', 'Tanggal', 'Nominal (Rp)', 'Status']];
       let invalidAmount = false;
       document.querySelectorAll('.table-panel tbody tr').forEach((row) => {
@@ -676,7 +678,7 @@
           if (member) return Array.from(member.querySelectorAll('strong, small'), (part) => part.textContent.trim()).join(' ');
           return cell.textContent;
         });
-        const amount = normalizeIndonesianAmount(cells[3]);
+        const amount = csvHelpers.normalizeIndonesianAmount(cells[3]);
         if (amount === null) {
           invalidAmount = true;
           return;
@@ -688,12 +690,14 @@
         exportStatus.textContent = 'Laporan tidak diunduh: ada nominal dengan format yang belum dikenali.';
         return;
       }
-      const csv = `\uFEFF${rows.map((row) => row.map(escapeCsvCell).join(',')).join('\r\n')}`;
+      const csv = `\uFEFF${rows.map((row) => row.map(csvHelpers.escapeCsvCell).join(',')).join('\r\n')}`;
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       const link = document.createElement('a');
       link.href = url;
       link.download = `laporan-transaksi-snapshot-${demoSnapshot.snapshotId}.csv`;
+      document.body.append(link);
       link.click();
+      link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
   </script>

@@ -15,7 +15,7 @@ test('rejects unknown or conflicting currency formats', () => {
 });
 
 test('neutralizes formula prefixes and standalone control characters', () => {
-  for (const value of ['=SUM(A1)', '+SUM(A1)', '-SUM(A1)', '@SUM(A1)', '\t', '\r', '\t=1+1', '\r=1+1']) {
+  for (const value of ['=SUM(A1)', '+SUM(A1)', '-SUM(A1)', '@SUM(A1)', '\t', '\r', '\t=1+1', '\r=1+1', ' =1+1', '\n=1+1']) {
     assert.equal(escapeCsvCell(value), `"\'${value}"`);
   }
 });
