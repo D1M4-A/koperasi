@@ -476,10 +476,20 @@
       if (restoreFocus && window.innerWidth <= 600) menuButton.focus();
     }
 
-    function showDemoView(key) {
+    function setActiveView(key) {
+      document.querySelectorAll('[data-view]').forEach((item) => {
+        const active = item.dataset.view === key;
+        item.classList.toggle('active', active);
+        if (active) item.setAttribute('aria-current', 'page');
+        else item.removeAttribute('aria-current');
+      });
+    }
+
+    function showDemoView(key, opener = document.activeElement) {
       const view = demoViews[key];
       if (!view) return;
-      dialogOpener = document.activeElement;
+      dialogOpener = opener;
+      if (document.querySelector(`[data-view="${key}"]`)) setActiveView(key);
       dialogTitle.textContent = view.title;
       dialogDescription.textContent = view.description;
       dialogContent.replaceChildren();
@@ -540,18 +550,18 @@
     document.querySelectorAll('[data-view]').forEach((button) => {
       button.addEventListener('click', () => {
         const key = button.dataset.view;
+        closeMobileMenu();
         if (key === 'dashboard') {
-          closeMobileMenu();
+          setActiveView(key);
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
-        closeMobileMenu();
-        showDemoView(key);
+        showDemoView(key, button);
       });
     });
 
     document.querySelectorAll('[data-demo-view]').forEach((button) => {
-      button.addEventListener('click', () => showDemoView(button.dataset.demoView));
+      button.addEventListener('click', () => showDemoView(button.dataset.demoView, button));
     });
 
     document.querySelector('.dialog-close').addEventListener('click', () => dialog.close());
@@ -559,7 +569,10 @@
       if (event.target === dialog) dialog.close();
     });
     dialog.addEventListener('close', () => {
-      if (dialogOpener && !dialogOpener.getClientRects().length && window.innerWidth <= 600) menuButton.focus();
+      const opener = dialogOpener;
+      if (opener && opener.getClientRects().length && !opener.closest('[inert]')) opener.focus();
+      else if (window.innerWidth <= 600) menuButton.focus();
+      setActiveView('dashboard');
       dialogOpener = null;
     });
 
@@ -613,6 +626,14 @@
       });
     });
 
+    function normalizeIndonesianAmount(value) {
+      const amount = value.trim().match(/^([+-]?)\s*(?:Rp\s*)?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?$/i);
+      if (!amount) return value;
+      const sign = amount[1] === '+' ? '' : amount[1];
+      const whole = amount[2].replace(/\./g, '');
+      return `${sign}${whole}${amount[3] ? `.${amount[3]}` : ''}`;
+    }
+
     document.querySelector('[data-action="export"]').addEventListener('click', () => {
       const rows = [['Anggota', 'Jenis transaksi', 'Tanggal', 'Nominal (Rp)', 'Status']];
       document.querySelectorAll('.table-panel tbody tr').forEach((row) => {
@@ -621,12 +642,11 @@
           if (member) return Array.from(member.querySelectorAll('strong, small'), (part) => part.textContent.trim()).join(' ');
           return cell.textContent.trim();
         });
-        const amount = cells[3].match(/^([+-]?)\s*(?:Rp\s*)?([\d.,]+)$/i);
-        if (amount) cells[3] = `${amount[1] === '+' ? '' : amount[1]}${amount[2].replace(/[.,]/g, '')}`;
+        cells[3] = normalizeIndonesianAmount(cells[3]);
         rows.push(cells);
       });
       const escapeCell = (value) => {
-        if (/^-?\d+$/.test(value)) return value;
+        if (/^-?\d+(?:\.\d+)?$/.test(value)) return value;
         const safeValue = /^[\t\r\n ]*[=+\-@]/.test(value) ? `'${value}` : value;
         return `"${safeValue.replaceAll('"', '""')}"`;
       };
